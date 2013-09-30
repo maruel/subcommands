@@ -113,6 +113,16 @@ func (t *TB) CheckBuffer(out, err bool) {
 	t.bufErr.Reset()
 }
 
+// CheckOut asserts that what was printed out Application.GetOut() matches what
+// is expected.
+// TODO(maruel): It doesn't matches the use case where the match must be fuzzy,
+// for example when non-deterministic data is included in the output.
+func (t *TB) CheckOut(expected string) {
+	actual := t.bufOut.String()
+	t.Assertf(expected == actual, "Expected:\n%s\nActual:\n%s", expected, actual)
+	t.bufOut.Reset()
+}
+
 // Verbose sets the current context as verbose. It immediately prints out all
 // logs generated for this specific test case up to now and redirects the log
 // to os.Stderr so the following log is directly output to the console.
