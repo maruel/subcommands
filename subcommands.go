@@ -26,14 +26,20 @@ import (
 
 // Application describes an application with subcommand support.
 type Application interface {
-	// Returns the 'name' of the application.
+	// GetName returns the 'name' of the application.
 	GetName() string
-	// Returns a one-line title explaining the purpose of the tool.
+
+	// GetTitle returns a one-line title explaining the purpose of the tool.
 	GetTitle() string
-	// Returns the list of the subcommands that are supported.
+
+	// GetCommands returns the list of the subcommands that are supported.
 	GetCommands() []*Command
-	GetOut() io.Writer // Used for testing, should be normally os.Stdout.
-	GetErr() io.Writer // Used for testing, should be normally os.Stderr.
+
+	// GetOut is used for testing to allow parallel test acse execution, should be normally os.Stdout.
+	GetOut() io.Writer
+
+	// GetOut is used for testing to allow parallel test acse execution, should be normally os.Stderr.
+	GetErr() io.Writer
 }
 
 // DefaultApplication implements all of Application interface's methods. An
@@ -68,10 +74,11 @@ func (a *DefaultApplication) GetErr() io.Writer {
 // CommandRun is an initialized object representing a subcommand that is ready
 // to be executed.
 type CommandRun interface {
-	// Execute the actual command. When this function is called by
+	// Run execute the actual command. When this function is called by
 	// command_support.Run(), the flags have already been parsed.
 	Run(a Application, args []string) int
-	// Returns the valid FlagSet for this specific command.
+
+	// GetFlags returns the flags for this specific command.
 	GetFlags() *flag.FlagSet
 }
 
@@ -106,13 +113,15 @@ func (c *Command) Name() string {
 }
 
 // usage prints out the general application usage.
+//
+// TODO(maruel): Use termbox-go to enable coloring!
 func usage(out io.Writer, a Application) {
 	usageTemplate := `{{.GetTitle}}
 
 Usage:  {{.GetName}} [command] [arguments]
 
 Commands:{{range .GetCommands}}
-    {{.Name | printf "%-11s"}} {{.ShortDesc}}{{end}}
+  {{.Name | printf "%-11s"}} {{.ShortDesc}}{{end}}
 
 Use "{{.GetName}} help [command]" for more information about a command.
 
@@ -210,8 +219,9 @@ func wrapWithLines(s string) string {
 	return s + "\n\n"
 }
 
-// Defines the help command. It should be included in your Commands list. It is
-// not added automatically.
+// Defines the help command. It should be included in your Commands list.
+//
+// It is not added automatically but it will be run automatically if added.
 var CmdHelp = &Command{
 	UsageLine:  "help <command>",
 	ShortDesc:  "prints help about a command",

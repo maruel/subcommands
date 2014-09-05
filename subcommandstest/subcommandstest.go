@@ -36,6 +36,9 @@ func DisableLogOutput() *bytes.Buffer {
 
 // TB wraps a testing.T object and adds functionality specific to
 // command_support.
+//
+// BUG: testing.TB is now a thing, so this struct should likely be renamed to
+// reduce confusion?
 type TB struct {
 	*testing.T
 	bufLog bytes.Buffer
