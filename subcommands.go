@@ -7,7 +7,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 or implied. See the License for the specific language governing permissions and
 limitations under the License. */
 
-// This package permits a Go application to implement subcommands support
+// Package subcommands permits a Go application to implement subcommands support
 // similar to what is supported by the 'go' tool.
 //
 // The library is designed so that the test cases can run concurrently.
@@ -35,10 +35,12 @@ type Application interface {
 	// GetCommands returns the list of the subcommands that are supported.
 	GetCommands() []*Command
 
-	// GetOut is used for testing to allow parallel test acse execution, should be normally os.Stdout.
+	// GetOut is used for testing to allow parallel test case execution, should
+	// be normally os.Stdout.
 	GetOut() io.Writer
 
-	// GetOut is used for testing to allow parallel test acse execution, should be normally os.Stderr.
+	// GetOut is used for testing to allow parallel test case execution, should
+	// be normally os.Stderr.
 	GetErr() io.Writer
 }
 
@@ -51,22 +53,27 @@ type DefaultApplication struct {
 	Commands []*Command
 }
 
+// GetName implements interface Application.
 func (a *DefaultApplication) GetName() string {
 	return a.Name
 }
 
+// GetTitle implements interface Application.
 func (a *DefaultApplication) GetTitle() string {
 	return a.Title
 }
 
+// GetNCommands implements interface Application.
 func (a *DefaultApplication) GetCommands() []*Command {
 	return a.Commands
 }
 
+// GetOut implements interface Application.
 func (a *DefaultApplication) GetOut() io.Writer {
 	return os.Stdout
 }
 
+// GetErr implements interface Application.
 func (a *DefaultApplication) GetErr() io.Writer {
 	return os.Stderr
 }
@@ -98,6 +105,7 @@ type CommandRunBase struct {
 	Flags flag.FlagSet
 }
 
+// GetFlags implements CommandRun.
 func (c *CommandRunBase) GetFlags() *flag.FlagSet {
 	return &c.Flags
 }
@@ -149,7 +157,7 @@ func initCommand(a Application, c *Command, r CommandRun, out io.Writer, helpUse
 	r.GetFlags().Init(c.Name(), flag.ContinueOnError)
 }
 
-// FincCommand finds a Command by name and returns it if found.
+// FindCommand finds a Command by name and returns it if found.
 func FindCommand(a Application, name string) *Command {
 	for _, c := range a.GetCommands() {
 		if c.Name() == name {
