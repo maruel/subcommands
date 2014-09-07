@@ -63,7 +63,7 @@ func (a *DefaultApplication) GetTitle() string {
 	return a.Title
 }
 
-// GetNCommands implements interface Application.
+// GetCommands implements interface Application.
 func (a *DefaultApplication) GetCommands() []*Command {
 	return a.Commands
 }
