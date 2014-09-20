@@ -1,11 +1,6 @@
-/* Copyright 2012 Marc-Antoine Ruel. Licensed under the Apache License, Version
-2.0 (the "License"); you may not use this file except in compliance with the
-License.  You may obtain a copy of the License at
-http://www.apache.org/licenses/LICENSE-2.0. Unless required by applicable law or
-agreed to in writing, software distributed under the License is distributed on
-an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-or implied. See the License for the specific language governing permissions and
-limitations under the License. */
+// Copyright 2012 Marc-Antoine Ruel. All rights reserved.
+// Use of this source code is governed under the Apache License, Version 2.0
+// that can be found in the LICENSE file.
 
 // Package subcommands permits a Go application to implement subcommands support
 // similar to what is supported by the 'go' tool.
@@ -18,6 +13,7 @@ package subcommands
 import (
 	"flag"
 	"fmt"
+	"github.com/texttheater/golang-levenshtein/levenshtein"
 	"io"
 	"os"
 	"strings"
@@ -89,16 +85,6 @@ type CommandRun interface {
 	GetFlags() *flag.FlagSet
 }
 
-// Command describes a subcommand. It has one generator to generate a command
-// object which is executable. The purpose of this design is to enable safe
-// parallel execution of test cases.
-type Command struct {
-	UsageLine  string
-	ShortDesc  string
-	LongDesc   string
-	CommandRun func() CommandRun
-}
-
 // CommandRunBase implements GetFlags of CommandRun. It should be embedded in
 // another struct that implements Run().
 type CommandRunBase struct {
@@ -108,6 +94,16 @@ type CommandRunBase struct {
 // GetFlags implements CommandRun.
 func (c *CommandRunBase) GetFlags() *flag.FlagSet {
 	return &c.Flags
+}
+
+// Command describes a subcommand. It has one generator to generate a command
+// object which is executable. The purpose of this design is to enable safe
+// parallel execution of test cases.
+type Command struct {
+	UsageLine  string
+	ShortDesc  string
+	LongDesc   string
+	CommandRun func() CommandRun
 }
 
 // Name returns the command's name: the first word in the usage line.
@@ -167,6 +163,65 @@ func FindCommand(a Application, name string) *Command {
 	return nil
 }
 
+// FindNearestCommand heuristically finds a Command the user wanted to type but
+// failed to type correctly.
+func FindNearestCommand(a Application, name string) *Command {
+	commands := map[string]*Command{}
+	for _, c := range a.GetCommands() {
+		commands[c.Name()] = c
+	}
+	if c, ok := commands[name]; ok {
+		return c
+	}
+
+	// Search for unique prefix.
+	withPrefix := []*Command{}
+	for n, c := range commands {
+		if strings.HasPrefix(n, name) {
+			withPrefix = append(withPrefix, c)
+		}
+	}
+	if len(withPrefix) == 1 {
+		return withPrefix[0]
+	}
+
+	// Search for case insensitivity.
+	withPrefix = []*Command{}
+	lowName := strings.ToLower(name)
+	for n, c := range commands {
+		if strings.HasPrefix(strings.ToLower(n), lowName) {
+			withPrefix = append(withPrefix, c)
+		}
+	}
+	if len(withPrefix) == 1 {
+		return withPrefix[0]
+	}
+
+	// Calculate the levenshtein distance and take the closest one.
+	var closestD int = 1000
+	var closestC *Command
+	var secondD int = 1000
+	for n, c := range commands {
+		dist := levenshtein.DistanceForStrings([]rune(n), []rune(name), levenshtein.DefaultOptions)
+		if dist < closestD {
+			secondD = closestD
+			closestD = dist
+			closestC = c
+		} else if dist < secondD {
+			secondD = dist
+		}
+	}
+	if closestD > 3 {
+		// Not similar enough. Don't be a fool and run a random command.
+		return nil
+	}
+	if (secondD - closestD) < 3 {
+		// Too ambiguous.
+		return nil
+	}
+	return closestC
+}
+
 // Run runs the application, scheduling the subcommand. This is the main entry
 // point of the library.
 func Run(a Application, args []string) int {
@@ -193,7 +248,7 @@ func Run(a Application, args []string) int {
 		return 2
 	}
 
-	if c := FindCommand(a, args[0]); c != nil {
+	if c := FindNearestCommand(a, args[0]); c != nil {
 		// Initialize the flags.
 		r := c.CommandRun()
 		initCommand(a, c, r, a.GetErr(), &helpUsed)
@@ -252,7 +307,7 @@ func (c *helpRun) Run(a Application, args []string) int {
 	}
 	// Redirects all output to Out.
 	var helpUsed bool
-	if cmd := FindCommand(a, args[0]); cmd != nil {
+	if cmd := FindNearestCommand(a, args[0]); cmd != nil {
 		// Initialize the flags.
 		r := cmd.CommandRun()
 		initCommand(a, cmd, r, a.GetErr(), &helpUsed)
