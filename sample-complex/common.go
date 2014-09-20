@@ -21,8 +21,9 @@ func (c *commonFlags) init() {
 
 func (c *commonFlags) parse(a *sampleComplexApplication) error {
 	if c.Verbose {
-		// Enable logging when -verbose is specified.
-		a.log = log.New(a.GetErr(), a.log.Prefix(), a.log.Flags())
+		// Enable logging when -verbose is specified by replacing io.Discard with
+		// a.GetErr().
+		a.Logger = log.New(a.GetErr(), a.Logger.Prefix(), a.Logger.Flags())
 	}
 	return nil
 }

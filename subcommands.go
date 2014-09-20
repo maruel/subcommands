@@ -25,6 +25,8 @@ import (
 
 // Application describes an application with subcommand support.
 type Application interface {
+	Logger
+
 	// GetName returns the 'name' of the application.
 	GetName() string
 
@@ -58,7 +60,12 @@ type EnvVarDefinition struct {
 // DefaultApplication implements all of Application interface's methods. An
 // application should usually have a global instance of DefaultApplication and
 // route main() to command_support.Run(app).
+//
+// DefaultApplication doesn't mock os.Stdout and os.Stderr.
 type DefaultApplication struct {
+	// It is recommended to use NewLogger() to initialize this value.
+	Logger
+
 	Name     string
 	Title    string
 	Commands []*Command
@@ -280,6 +287,7 @@ func FindCommand(a Application, name string) *Command {
 			return c
 		}
 	}
+	// TODO(maruel): Try fuzzy matching.
 	return nil
 }
 

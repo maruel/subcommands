@@ -30,7 +30,7 @@ var cmdAsk = &subcommands.Command{
 	CommandRun: func() subcommands.CommandRun {
 		c := &askRun{}
 		c.init()
-		app := sampleComplexApplication{askApplication, nil}
+		app := sampleComplexApplication{askApplication}
 		c.Flags.Usage = func() {
 			advanced := helpAdvanced != nil && helpAdvanced.String() == "true"
 			subcommands.Usage(os.Stderr, &app, advanced)
@@ -55,8 +55,7 @@ func (a *askCommonFlags) parse(*sampleComplexApplication) error {
 }
 
 func (c *askRun) Run(a subcommands.Application, args []string, env subcommands.Env) int {
-	d := a.(*sampleComplexApplication)
 	// Create an inner application.
-	app := sampleComplexApplication{askApplication, d.log}
+	app := sampleComplexApplication{askApplication}
 	return subcommands.Run(&app, args)
 }
