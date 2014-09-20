@@ -65,6 +65,7 @@ func TestFindNearestCommand(t *testing.T) {
 	// Based on levenshtein distance
 	ut.AssertEqual(t, (*Command)(nil), FindNearestCommand(a, "Fof"))
 	ut.AssertEqual(t, commands[2], FindNearestCommand(a, "LongCommandd"))
+	ut.AssertEqual(t, commands[2], FindNearestCommand(a, "LongCmomand"))
 	ut.AssertEqual(t, commands[2], FindNearestCommand(a, "ongCommand"))
 	ut.AssertEqual(t, (*Command)(nil), FindNearestCommand(a, "LangCommand"))
 }
