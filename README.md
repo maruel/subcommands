@@ -14,8 +14,8 @@ The intented command is found via heuristic search;
   - unique prefix, e.g. `lo` will run `longcommand` as long as there's no
     command with the same prefix.
   - case insensitivity; for those weird enough to use Upper Cased Commands.
-  - levenshtein distance; where `longcmmand` or `longcmomand` will properly
-    trigger `longcommand`.
+  - [levenshtein distance](http://en.wikipedia.org/wiki/Levenshtein_distance);
+    where `longcmmand` or `longcmomand` will properly trigger `longcommand`.
 
 
 Documentation
