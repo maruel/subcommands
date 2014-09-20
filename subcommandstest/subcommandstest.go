@@ -102,18 +102,6 @@ func (t *TB) Verbose() {
 	t.log = log.New(os.Stderr, "", log.Lmicroseconds)
 }
 
-// GetLog implements Application.
-func (t *TB) GetLog() *log.Logger {
-	return t.log
-}
-
-// Application supports all of subcommands.Application and adds GetLog() for
-// testing purposes.
-type Application interface {
-	subcommands.Application
-	GetLog() *log.Logger
-}
-
 // ApplicationMock wrap both an Application and a TB. ApplicationMock
 // implements GetOut and GetErr and adds GetLog(). GetLog() is implemented by
 // TB.

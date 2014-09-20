@@ -6,12 +6,10 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 
 	"github.com/maruel/subcommands"
-	"github.com/maruel/subcommands/subcommandstest"
 )
 
 var application = &subcommands.DefaultApplication{
@@ -40,9 +38,7 @@ var application = &subcommands.DefaultApplication{
 }
 
 type sampleApplication interface {
-	// TODO(maruel): This is wrong, subcommandtest should only be referenced in
-	// unit tests. Figure out a way to better plug logging.
-	subcommandstest.Application
+	subcommands.Application
 
 	// Add anything desired, in particular if you'd like to crete a fake
 	// application during testing.
@@ -50,16 +46,27 @@ type sampleApplication interface {
 
 type sample struct {
 	*subcommands.DefaultApplication
-	log *log.Logger
-}
-
-// GetLog implements subcommandstest.Application.
-func (s *sample) GetLog() *log.Logger {
-	return s.log
 }
 
 func main() {
 	subcommands.KillStdLog()
-	s := &sample{application, log.New(ioutil.Discard, "", log.LstdFlags|log.Lmicroseconds)}
-	os.Exit(subcommands.Run(s, nil))
+	application := &subcommands.DefaultApplication{
+		Logger: subcommands.NewLogger(),
+		Name:   "sample",
+		Title:  "Sample tool to act as a skeleton for subcommands usage.",
+		// Commands will be shown in this exact order, so you'll likely want to put
+		// them in alphabetical order or in logical grouping.
+		Commands: []*subcommands.Command{
+			cmdGreet,
+			subcommands.CmdHelp,
+			cmdAsk,
+			cmdSleep,
+		},
+	}
+
+	application.SetFlags(log.LstdFlags | log.Lmicroseconds)
+	// Disable log by default, unless -verbose is specified.
+	//d := &sample{application, log.New(nullWriter(0), "", log.LstdFlags|log.Lmicroseconds)}
+	d := &sample{application, log.New(application.GetErr(), "")}
+	os.Exit(subcommands.Run(d, nil))
 }

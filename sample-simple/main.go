@@ -83,6 +83,7 @@ func (c *sleepRun) Run(a subcommands.Application, args []string, env subcommands
 }
 
 func main() {
+	// It is not used Application.Logger.
 	log.SetFlags(log.Lmicroseconds)
 	os.Exit(subcommands.Run(application, nil))
 }
