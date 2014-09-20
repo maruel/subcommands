@@ -11,11 +11,11 @@ conccurently.
 The intented command is found via heuristic search;
 
   - exact match
-  - unique prefix, e.g. "fo" will run "foo" as long as there's no command with
-    the same prefix.
+  - unique prefix, e.g. `lo` will run `longcommand` as long as there's no
+    command with the same prefix.
   - case insensitivity; for those weird enough to use Upper Cased Commands.
-  - levenshtein distance; where "longcmmand" or "longcmomand" will properly
-    trigger "longcommand".
+  - levenshtein distance; where `longcmmand` or `longcmomand` will properly
+    trigger `longcommand`.
 
 
 Documentation
