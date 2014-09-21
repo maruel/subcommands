@@ -31,5 +31,5 @@ func (p nullWriter) Write(b []byte) (n int, err error) {
 // VoidStdLog sets an output that will be ignored. This permits ignoring any
 // log.*() calls that would inhibit efficient use of t.Parallel().
 func VoidStdLog() {
-	log.SetOutput(panicWriter{})
+	log.SetOutput(nullWriter{})
 }
