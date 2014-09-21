@@ -8,28 +8,32 @@ import (
 	"log"
 )
 
-type panicWriter struct {
+// PanicWriter is an io.Writer that will panic if used.
+type PanicWriter struct {
 }
 
-func (p panicWriter) Write(b []byte) (n int, err error) {
+// Write implements io.Writer.
+func (p PanicWriter) Write(b []byte) (n int, err error) {
 	panic("unexpected write")
 }
 
 // KillStdLog sets an output that will panic if used. This permits trapping any
 // log.*() calls that would inhibit efficient use of t.Parallel().
 func KillStdLog() {
-	log.SetOutput(panicWriter{})
+	log.SetOutput(PanicWriter{})
 }
 
-type nullWriter struct {
+// NullWriter is an io.Writer that ignores everything written to it.
+type NullWriter struct {
 }
 
-func (p nullWriter) Write(b []byte) (n int, err error) {
+// Write implements io.Writer.
+func (p NullWriter) Write(b []byte) (n int, err error) {
 	return len(b), nil
 }
 
 // VoidStdLog sets an output that will be ignored. This permits ignoring any
 // log.*() calls that would inhibit efficient use of t.Parallel().
 func VoidStdLog() {
-	log.SetOutput(nullWriter{})
+	log.SetOutput(NullWriter{})
 }

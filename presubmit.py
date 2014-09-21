@@ -42,7 +42,11 @@ def main():
     call(['go', 'test'], '.'),
     call(['go', 'test'], 'subcommandstest'),
     call(['go', 'test'], 'sample-simple'),
+    call(['go', 'build'], 'sample-complex'),
     errcheck('.'),
+    errcheck('sample-simple'),
+    errcheck('sample-complex'),
+    errcheck('subcommandstest'),
   ]
   failed = False
   out = drain(procs.pop(0))

@@ -92,8 +92,8 @@ func (t *TB) Assertf(truth bool, format string, values ...interface{}) {
 		PrintIf(t.bufOut.Bytes(), "STDOUT")
 		PrintIf(t.bufErr.Bytes(), "STDERR")
 		PrintIf(t.bufLog.Bytes(), "LOG")
-		os.Stderr.Write([]byte("\n"))
-		os.Stderr.Write(ReduceStackTrace(debug.Stack()))
+		_, _ = os.Stderr.Write([]byte("\n"))
+		_, _ = os.Stderr.Write(ReduceStackTrace(debug.Stack()))
 		t.Fatalf(format, values...)
 	}
 }
@@ -131,7 +131,7 @@ func (t *TB) CheckOut(expected string) {
 // to os.Stderr so the following log is directly output to the console.
 func (t *TB) Verbose() {
 	if t.bufLog.Len() != 0 {
-		os.Stderr.Write(t.bufLog.Bytes())
+		_, _ = os.Stderr.Write(t.bufLog.Bytes())
 	}
 	t.log = log.New(os.Stderr, "", log.Lmicroseconds)
 }
