@@ -7,7 +7,6 @@ package main
 import (
 	"github.com/maruel/subcommands"
 	"github.com/maruel/ut"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"

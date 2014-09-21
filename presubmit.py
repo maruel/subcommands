@@ -39,8 +39,9 @@ def drain(proc):
 def main():
   start = time.time()
   procs = [
+    call(['go', 'test'], '.'),
     call(['go', 'test'], 'subcommandstest'),
-    call(['go', 'build'], 'sample-simple'),
+    call(['go', 'test'], 'sample-simple'),
     errcheck('.'),
   ]
   failed = False
