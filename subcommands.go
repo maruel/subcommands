@@ -13,11 +13,12 @@ package subcommands
 import (
 	"flag"
 	"fmt"
-	"github.com/texttheater/golang-levenshtein/levenshtein"
 	"io"
 	"os"
 	"strings"
 	"text/template"
+
+	"github.com/texttheater/golang-levenshtein/levenshtein"
 )
 
 // Application describes an application with subcommand support.

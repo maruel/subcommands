@@ -13,13 +13,14 @@ package subcommandstest
 import (
 	"bytes"
 	"fmt"
-	"github.com/maruel/subcommands"
 	"io"
 	"log"
 	"os"
 	"runtime/debug"
 	"strings"
 	"testing"
+
+	"github.com/maruel/subcommands"
 )
 
 // Logging is a global object so it can't be checked for when tests are run in

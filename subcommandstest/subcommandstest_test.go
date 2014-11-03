@@ -10,8 +10,9 @@ limitations under the License. */
 package subcommandstest
 
 import (
-	"github.com/maruel/subcommands"
 	"testing"
+
+	"github.com/maruel/subcommands"
 )
 
 // Testing subcommands would require importing subcommandstest. To not create

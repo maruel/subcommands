@@ -5,12 +5,13 @@
 package main
 
 import (
-	"github.com/maruel/subcommands"
-	"github.com/maruel/ut"
 	"io/ioutil"
 	"log"
 	"os"
 	"testing"
+
+	"github.com/maruel/subcommands"
+	"github.com/maruel/ut"
 )
 
 // t.Parallel() cannot be used here, see main.go for rationale.

@@ -11,15 +11,16 @@
 package subcommands
 
 import (
-	"github.com/maruel/ut"
 	"testing"
+
+	"github.com/maruel/ut"
 )
 
 func TestFindCommand(t *testing.T) {
 	commands := []*Command{
-		&Command{UsageLine: "Fo"},
-		&Command{UsageLine: "Foo bar"},
-		&Command{UsageLine: "LongCommand"},
+		{UsageLine: "Fo"},
+		{UsageLine: "Foo bar"},
+		{UsageLine: "LongCommand"},
 	}
 	a := &DefaultApplication{Commands: commands}
 
@@ -40,10 +41,10 @@ func TestFindCommand(t *testing.T) {
 
 func TestFindNearestCommand(t *testing.T) {
 	commands := []*Command{
-		&Command{UsageLine: "Fo"},
-		&Command{UsageLine: "Foo"},
-		&Command{UsageLine: "LongCommand"},
-		&Command{UsageLine: "LargCommand"},
+		{UsageLine: "Fo"},
+		{UsageLine: "Foo"},
+		{UsageLine: "LongCommand"},
+		{UsageLine: "LargCommand"},
 	}
 	a := &DefaultApplication{Commands: commands}
 

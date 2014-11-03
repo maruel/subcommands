@@ -5,8 +5,9 @@
 package main
 
 import (
-	"github.com/maruel/subcommands"
 	"log"
+
+	"github.com/maruel/subcommands"
 )
 
 // Common flags.

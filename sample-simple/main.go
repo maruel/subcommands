@@ -13,9 +13,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/maruel/subcommands"
 	"log"
 	"os"
+
+	"github.com/maruel/subcommands"
 )
 
 var application = &subcommands.DefaultApplication{

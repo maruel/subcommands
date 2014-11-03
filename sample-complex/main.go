@@ -6,10 +6,11 @@
 package main
 
 import (
-	"github.com/maruel/subcommands"
-	"github.com/maruel/subcommands/subcommandstest"
 	"log"
 	"os"
+
+	"github.com/maruel/subcommands"
+	"github.com/maruel/subcommands/subcommandstest"
 )
 
 var application = &subcommands.DefaultApplication{
