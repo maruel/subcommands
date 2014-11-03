@@ -17,9 +17,9 @@ The intented command is found via heuristic search;
   - [levenshtein distance](http://en.wikipedia.org/wiki/Levenshtein_distance);
     where `longcmmand` or `longcmomand` will properly trigger `longcommand`.
 
-[![GoDoc](https://godoc.org/github.com/maruel/fortuna?status.svg)](https://godoc.org/github.com/maruel/fortuna)
-[![Build Status](https://travis-ci.org/maruel/fortuna.svg?branch=master)](https://travis-ci.org/maruel/fortuna)
-[![Coverage Status](https://img.shields.io/coveralls/maruel/fortuna.svg)](https://coveralls.io/r/maruel/fortuna?branch=master)
+[![GoDoc](https://godoc.org/github.com/maruel/subcommands?status.svg)](https://godoc.org/github.com/maruel/subcommands)
+[![Build Status](https://travis-ci.org/maruel/subcommands.svg?branch=master)](https://travis-ci.org/maruel/subcommands)
+[![Coverage Status](https://img.shields.io/coveralls/maruel/subcommands.svg)](https://coveralls.io/r/maruel/subcommands?branch=master)
 
 
 Examples
