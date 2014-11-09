@@ -6,6 +6,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -47,6 +48,6 @@ func (s *sample) GetLog() *log.Logger {
 
 func main() {
 	subcommands.KillStdLog()
-	s := &sample{application, log.New(subcommands.NullWriter{}, "", log.LstdFlags|log.Lmicroseconds)}
+	s := &sample{application, log.New(ioutil.Discard, "", log.LstdFlags|log.Lmicroseconds)}
 	os.Exit(subcommands.Run(s, nil))
 }

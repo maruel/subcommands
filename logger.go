@@ -5,6 +5,7 @@
 package subcommands
 
 import (
+	"io/ioutil"
 	"log"
 )
 
@@ -23,17 +24,8 @@ func KillStdLog() {
 	log.SetOutput(PanicWriter{})
 }
 
-// NullWriter is an io.Writer that ignores everything written to it.
-type NullWriter struct {
-}
-
-// Write implements io.Writer.
-func (p NullWriter) Write(b []byte) (n int, err error) {
-	return len(b), nil
-}
-
 // VoidStdLog sets an output that will be ignored. This permits ignoring any
 // log.*() calls that would inhibit efficient use of t.Parallel().
 func VoidStdLog() {
-	log.SetOutput(NullWriter{})
+	log.SetOutput(ioutil.Discard)
 }
