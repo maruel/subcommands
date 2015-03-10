@@ -37,7 +37,7 @@ func mockStdout(t testing.TB) func() {
 }
 
 func assertStdout(t testing.TB, expected string) {
-	os.Stdout.Seek(0, 0)
+	_, _ = os.Stdout.Seek(0, 0)
 	actual, err := ioutil.ReadAll(os.Stdout)
 	ut.AssertEqual(t, nil, err)
 	ut.AssertEqual(t, expected, string(actual))
