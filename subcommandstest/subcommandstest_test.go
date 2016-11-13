@@ -25,7 +25,6 @@ func init() {
 }
 
 func TestHelp(t *testing.T) {
-	t.Parallel()
 	app := &subcommands.DefaultApplication{
 		Name:  "name",
 		Title: "doc",
@@ -41,7 +40,6 @@ func TestHelp(t *testing.T) {
 }
 
 func TestHelpBadFlag(t *testing.T) {
-	t.Parallel()
 	app := &subcommands.DefaultApplication{
 		Name:  "name",
 		Title: "doc",
@@ -57,7 +55,6 @@ func TestHelpBadFlag(t *testing.T) {
 }
 
 func TestHelpBadCommand(t *testing.T) {
-	t.Parallel()
 	app := &subcommands.DefaultApplication{
 		Name:  "name",
 		Title: "doc",
@@ -73,7 +70,6 @@ func TestHelpBadCommand(t *testing.T) {
 }
 
 func TestBadCommand(t *testing.T) {
-	t.Parallel()
 	app := &subcommands.DefaultApplication{
 		Name:  "name",
 		Title: "doc",
