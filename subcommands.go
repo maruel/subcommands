@@ -104,6 +104,7 @@ type Command struct {
 	UsageLine  string
 	ShortDesc  string
 	LongDesc   string
+	Advanced   bool
 	CommandRun func() CommandRun
 }
 
@@ -120,18 +121,41 @@ func (c *Command) Name() string {
 // usage prints out the general application usage.
 //
 // TODO(maruel): Use termbox-go to enable coloring!
-func usage(out io.Writer, a Application) {
-	usageTemplate := `{{.GetTitle}}
+func usage(out io.Writer, a Application, includeAdvanced bool) {
+	usageTemplate := `{{.Title}}
 
-Usage:  {{.GetName}} [command] [arguments]
+Usage:  {{.Name}} [command] [arguments]
 
-Commands:{{range .GetCommands}}
+Commands:{{range .Commands}}
   {{.Name | printf "%-11s"}} {{.ShortDesc}}{{end}}
 
-Use "{{.GetName}} help [command]" for more information about a command.
+Use "{{.Name}} help [command]" for more information about a command.{{if .ShowAdvancedTip}}
+Use "{{.Name}} help -advanced" to display all commands.{{end}}
 
 `
-	tmpl(out, usageTemplate, a)
+
+	allCmds := a.GetCommands()
+	var cmds []*Command
+	if includeAdvanced {
+		cmds = allCmds
+	} else {
+		cmds = make([]*Command, 0, len(allCmds))
+	}
+	hasAdvanced := false
+	for _, c := range allCmds {
+		if c.Advanced {
+			hasAdvanced = true
+		} else if !includeAdvanced {
+			cmds = append(cmds, c)
+		} // if includeAdvanced then cmds == allCmds already
+	}
+	data := map[string]interface{}{
+		"Title":           a.GetTitle(),
+		"Name":            a.GetName(),
+		"Commands":        cmds,
+		"ShowAdvancedTip": (hasAdvanced && !includeAdvanced),
+	}
+	tmpl(out, usageTemplate, data)
 }
 
 func getCommandUsageHandler(out io.Writer, a Application, c *Command, r CommandRun, helpUsed *bool) func() {
@@ -199,9 +223,9 @@ func FindNearestCommand(a Application, name string) *Command {
 	}
 
 	// Calculate the levenshtein distance and take the closest one.
-	var closestD int = 1000
+	closestD := 1000
 	var closestC *Command
-	var secondD int = 1000
+	secondD := 1000
 	for n, c := range commands {
 		dist := levenshtein.DistanceForStrings([]rune(n), []rune(name), levenshtein.DefaultOptions)
 		if dist < closestD {
@@ -230,7 +254,7 @@ func Run(a Application, args []string) int {
 
 	// Process general flags first, mainly for -help.
 	flag.Usage = func() {
-		usage(a.GetErr(), a)
+		usage(a.GetErr(), a, false)
 		helpUsed = true
 	}
 
@@ -245,7 +269,7 @@ func Run(a Application, args []string) int {
 
 	if len(args) < 1 {
 		// Need a command.
-		usage(a.GetErr(), a)
+		usage(a.GetErr(), a, false)
 		return 2
 	}
 
@@ -283,23 +307,29 @@ func wrapWithLines(s string) string {
 	return s + "\n\n"
 }
 
-// Defines the help command. It should be included in your Commands list.
+// CmdHelp defines the help command. It should be included in your application's
+// Commands list.
 //
 // It is not added automatically but it will be run automatically if added.
 var CmdHelp = &Command{
-	UsageLine:  "help <command>",
-	ShortDesc:  "prints help about a command",
-	LongDesc:   "Prints an overview of every commands or information about a specific command.",
-	CommandRun: func() CommandRun { return &helpRun{} },
+	UsageLine: "help [<command>|-advanced]",
+	ShortDesc: "prints help about a command",
+	LongDesc:  "Prints an overview of every command or information about a specific command.\nPass -advanced to see help for advanced commands.",
+	CommandRun: func() CommandRun {
+		ret := &helpRun{}
+		ret.Flags.BoolVar(&ret.advanced, "advanced", false, "show advanced commands")
+		return ret
+	},
 }
 
 type helpRun struct {
 	CommandRunBase
+	advanced bool
 }
 
 func (c *helpRun) Run(a Application, args []string) int {
 	if len(args) == 0 {
-		usage(a.GetOut(), a)
+		usage(a.GetOut(), a, c.advanced)
 		return 0
 	}
 	if len(args) != 1 {
