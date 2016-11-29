@@ -25,22 +25,22 @@ type greetRun struct {
 	CommonFlags
 }
 
-func (c *greetRun) main(a SampleApplication, who string) error {
+func (c *greetRun) main(a SampleApplication, who, greeting string) error {
 	if err := c.Parse(a, false); err != nil {
 		return err
 	}
 	a.GetLog().Printf("Unnecessary logging, use -verbose to see it")
-	fmt.Fprintf(a.GetOut(), "Hi %s!\n", who)
+	fmt.Fprintf(a.GetOut(), "%s %s!\n", greeting, who)
 	return nil
 }
 
-func (c *greetRun) Run(a subcommands.Application, args []string) int {
+func (c *greetRun) Run(a subcommands.Application, args []string, env subcommands.Env) int {
 	if len(args) != 1 {
 		fmt.Fprintf(a.GetErr(), "%s: Can only greet one person at a time.\n", a.GetName())
 		return 1
 	}
 	d := a.(SampleApplication)
-	if err := c.main(d, args[0]); err != nil {
+	if err := c.main(d, args[0], env["GREET_STYLE"].Value); err != nil {
 		fmt.Fprintf(a.GetErr(), "%s: %s\n", a.GetName(), err)
 		return 1
 	}

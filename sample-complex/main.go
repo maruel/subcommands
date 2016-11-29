@@ -25,6 +25,16 @@ var application = &subcommands.DefaultApplication{
 		cmdAsk,
 		cmdSleep,
 	},
+	EnvVars: map[string]subcommands.EnvVarDefinition{
+		"GREET_STYLE": {
+			ShortDesc: "Controls the type of greeting.",
+			Default:   "Hi",
+		},
+		"VERBOSE_DREAMS": {
+			Advanced:  true,
+			ShortDesc: `If set to "1", shows dream while sleeping.`,
+		},
+	},
 }
 
 type SampleApplication interface {

@@ -36,7 +36,7 @@ func (c *askAppleRun) main(a askApplication) error {
 	return nil
 }
 
-func (c *askAppleRun) Run(a subcommands.Application, args []string) int {
+func (c *askAppleRun) Run(a subcommands.Application, args []string, env subcommands.Env) int {
 	if len(args) != 0 {
 		fmt.Fprintf(a.GetErr(), "%s: Unknown arguments.\n", a.GetName())
 		return 1
