@@ -52,7 +52,7 @@ func (q askApplication) GetCommands() []*subcommands.Command {
 	}
 }
 
-func (c *askRun) Run(a subcommands.Application, args []string) int {
+func (c *askRun) Run(a subcommands.Application, args []string, env subcommands.Env) int {
 	d := a.(SampleApplication)
 	// Create an inner application.
 	return subcommands.Run(askApplication{d}, args)

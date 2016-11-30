@@ -36,7 +36,7 @@ func (c *askBeerRun) main(a askApplication) error {
 	return errors.New("It's a BYOB part!")
 }
 
-func (c *askBeerRun) Run(a subcommands.Application, args []string) int {
+func (c *askBeerRun) Run(a subcommands.Application, args []string, env subcommands.Env) int {
 	if len(args) != 0 {
 		fmt.Fprintf(a.GetErr(), "%s: Unknown arguments.\n", a.GetName())
 		return 1

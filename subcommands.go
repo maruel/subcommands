@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -39,6 +40,18 @@ type Application interface {
 	// GetOut is used for testing to allow parallel test case execution, should
 	// be normally os.Stderr.
 	GetErr() io.Writer
+
+	// GetEnvVars returns the map of EnvVarName -> EnvVarDefinition that this
+	// Application responds to.
+	GetEnvVars() map[string]EnvVarDefinition
+}
+
+// EnvVarDefinition describes an environment variable that this application
+// responds to.
+type EnvVarDefinition struct {
+	Advanced  bool
+	ShortDesc string
+	Default   string
 }
 
 // DefaultApplication implements all of Application interface's methods. An
@@ -48,6 +61,7 @@ type DefaultApplication struct {
 	Name     string
 	Title    string
 	Commands []*Command
+	EnvVars  map[string]EnvVarDefinition
 }
 
 // GetName implements interface Application.
@@ -75,12 +89,30 @@ func (a *DefaultApplication) GetErr() io.Writer {
 	return os.Stderr
 }
 
+// GetEnvVars implements interface Application.
+func (a *DefaultApplication) GetEnvVars() map[string]EnvVarDefinition {
+	return a.EnvVars
+}
+
+// Env is the mapping of resolved environment variables passed to
+// CommandRun.Run.
+type Env map[string]EnvVar
+
+// EnvVar will document the value and existance of a given environment variable,
+// as defined by Application.GetEnvVars. Value will be the value from the
+// environment, or the Default value if it didn't exist. Exists will be true iff
+// the value was present in the environment.
+type EnvVar struct {
+	Value  string
+	Exists bool
+}
+
 // CommandRun is an initialized object representing a subcommand that is ready
 // to be executed.
 type CommandRun interface {
 	// Run execute the actual command. When this function is called by
 	// command_support.Run(), the flags have already been parsed.
-	Run(a Application, args []string) int
+	Run(a Application, args []string, env Env) int
 
 	// GetFlags returns the flags for this specific command.
 	GetFlags() *flag.FlagSet
@@ -127,35 +159,68 @@ func usage(out io.Writer, a Application, includeAdvanced bool) {
 Usage:  {{.Name}} [command] [arguments]
 
 Commands:{{range .Commands}}
-  {{.Name | printf "%-11s"}} {{.ShortDesc}}{{end}}
+  {{.Name | printf "%%-%ds"}}  {{.ShortDesc}}{{end}}
 
+{{if .EnvVars}}Environment Variables:{{range .EnvVars}}
+  {{.Name | printf "%%-%ds"}}  {{.ShortDesc}}{{if .Default}} (Default: {{.Default | printf "%%q"}}){{end}}{{end}}
+
+{{end}}
 Use "{{.Name}} help [command]" for more information about a command.{{if .ShowAdvancedTip}}
 Use "{{.Name}} help -advanced" to display all commands.{{end}}
 
 `
 
+	widestCmd := 0
 	allCmds := a.GetCommands()
-	var cmds []*Command
-	if includeAdvanced {
-		cmds = allCmds
-	} else {
-		cmds = make([]*Command, 0, len(allCmds))
-	}
+	cmds := make([]*Command, 0, len(allCmds))
 	hasAdvanced := false
 	for _, c := range allCmds {
-		if c.Advanced {
-			hasAdvanced = true
-		} else if !includeAdvanced {
+		hasAdvanced = hasAdvanced || c.Advanced
+
+		if !c.Advanced || includeAdvanced {
+			// We need to include this command
+			if namLen := len(c.Name()); namLen > widestCmd {
+				widestCmd = namLen
+			}
 			cmds = append(cmds, c)
-		} // if includeAdvanced then cmds == allCmds already
+		}
+	}
+
+	type envVarEntry struct {
+		Name      string
+		ShortDesc string
+		Default   string
+	}
+	widestEnvVar := 0
+	envVars := []envVarEntry(nil)
+	if envVarMap := a.GetEnvVars(); len(envVarMap) > 0 {
+		envVarKeys := make(sort.StringSlice, 0, len(envVarMap))
+		for k, v := range envVarMap {
+			if v.Advanced {
+				hasAdvanced = true
+			}
+			if !v.Advanced || includeAdvanced {
+				if keyLen := len(k); keyLen > widestEnvVar {
+					widestEnvVar = keyLen
+				}
+				envVarKeys = append(envVarKeys, k)
+			}
+		}
+		envVarKeys.Sort()
+		envVars = make([]envVarEntry, 0, len(envVarKeys))
+		for _, k := range envVarKeys {
+			v := envVarMap[k]
+			envVars = append(envVars, envVarEntry{k, v.ShortDesc, v.Default})
+		}
 	}
 	data := map[string]interface{}{
 		"Title":           a.GetTitle(),
 		"Name":            a.GetName(),
 		"Commands":        cmds,
+		"EnvVars":         envVars,
 		"ShowAdvancedTip": (hasAdvanced && !includeAdvanced),
 	}
-	tmpl(out, usageTemplate, data)
+	tmpl(out, fmt.Sprintf(usageTemplate, widestCmd, widestEnvVar), data)
 }
 
 func getCommandUsageHandler(out io.Writer, a Application, c *Command, r CommandRun, helpUsed *bool) func() {
@@ -283,7 +348,16 @@ func Run(a Application, args []string) int {
 		if helpUsed {
 			return 0
 		}
-		return r.Run(a, r.GetFlags().Args())
+		envVars := a.GetEnvVars()
+		envMap := make(map[string]EnvVar, len(envVars))
+		for k, v := range envVars {
+			val, ok := os.LookupEnv(k)
+			if !ok {
+				val = v.Default
+			}
+			envMap[k] = EnvVar{val, ok}
+		}
+		return r.Run(a, r.GetFlags().Args(), envMap)
 	}
 
 	fmt.Fprintf(a.GetErr(), "%s: unknown command %#q\n\nRun '%s help' for usage.\n", a.GetName(), args[0], a.GetName())
@@ -327,7 +401,7 @@ type helpRun struct {
 	advanced bool
 }
 
-func (c *helpRun) Run(a Application, args []string) int {
+func (c *helpRun) Run(a Application, args []string, env Env) int {
 	if len(args) == 0 {
 		usage(a.GetOut(), a, c.advanced)
 		return 0

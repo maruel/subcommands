@@ -11,6 +11,7 @@
 package subcommands
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/maruel/ut"
@@ -69,4 +70,59 @@ func TestFindNearestCommand(t *testing.T) {
 	ut.AssertEqual(t, commands[2], FindNearestCommand(a, "LongCmomand"))
 	ut.AssertEqual(t, commands[2], FindNearestCommand(a, "ongCommand"))
 	ut.AssertEqual(t, (*Command)(nil), FindNearestCommand(a, "LangCommand"))
+}
+
+func TestHelpOutput(t *testing.T) {
+	a := &DefaultApplication{
+		Commands: []*Command{
+			{UsageLine: "Foo", ShortDesc: "A foo"},
+			{UsageLine: "SuperDuperLongLine", ShortDesc: "A long thing", Advanced: true},
+		},
+		EnvVars: map[string]EnvVarDefinition{
+			"EVAR":            {ShortDesc: "Desc"},
+			"SUPER_LONG_EVAR": {ShortDesc: "Desc", Advanced: true},
+			"DFLT_EVAR":       {ShortDesc: "Desc", Default: "yep"},
+		},
+	}
+
+	buf := bytes.Buffer{}
+	usage(&buf, a, false)
+
+	ut.AssertEqual(t, buf.String(), `
+
+Usage:   [command] [arguments]
+
+Commands:
+  Foo  A foo
+
+Environment Variables:
+  DFLT_EVAR  Desc (Default: "yep")
+  EVAR       Desc
+
+
+Use " help [command]" for more information about a command.
+Use " help -advanced" to display all commands.
+
+`)
+
+	buf.Reset()
+	usage(&buf, a, true)
+	ut.AssertEqual(t, buf.String(), `
+
+Usage:   [command] [arguments]
+
+Commands:
+  Foo                 A foo
+  SuperDuperLongLine  A long thing
+
+Environment Variables:
+  DFLT_EVAR        Desc (Default: "yep")
+  EVAR             Desc
+  SUPER_LONG_EVAR  Desc
+
+
+Use " help [command]" for more information about a command.
+
+`)
+
 }

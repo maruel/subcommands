@@ -44,7 +44,7 @@ type greetRun struct {
 	subcommands.CommandRunBase
 }
 
-func (c *greetRun) Run(a subcommands.Application, args []string) int {
+func (c *greetRun) Run(a subcommands.Application, args []string, env subcommands.Env) int {
 	if len(args) != 1 {
 		fmt.Fprintf(os.Stderr, "%s: Can only greet one person at a time.\n", a.GetName())
 		return 1
@@ -69,7 +69,7 @@ type sleepRun struct {
 	duration int
 }
 
-func (c *sleepRun) Run(a subcommands.Application, args []string) int {
+func (c *sleepRun) Run(a subcommands.Application, args []string, env subcommands.Env) int {
 	if len(args) != 0 {
 		fmt.Fprintf(os.Stderr, "%s: Unsupported arguments.\n", a.GetName())
 		return 1
