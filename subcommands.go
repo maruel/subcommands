@@ -138,6 +138,8 @@ type Command struct {
 	LongDesc   string
 	Advanced   bool
 	CommandRun func() CommandRun
+
+	isSection bool
 }
 
 // Name returns the command's name: the first word in the usage line.
@@ -148,6 +150,15 @@ func (c *Command) Name() string {
 		name = name[:i]
 	}
 	return name
+}
+
+// Section returns an un-runnable command that can act as a nice section
+// heading for other commands.
+func Section(name string) *Command {
+	return &Command{
+		ShortDesc: "\n\t" + name,
+		isSection: true,
+	}
 }
 
 // usage prints out the general application usage.
@@ -258,7 +269,9 @@ func FindCommand(a Application, name string) *Command {
 func FindNearestCommand(a Application, name string) *Command {
 	commands := map[string]*Command{}
 	for _, c := range a.GetCommands() {
-		commands[c.Name()] = c
+		if !c.isSection {
+			commands[c.Name()] = c
+		}
 	}
 	if c, ok := commands[name]; ok {
 		return c

@@ -20,9 +20,11 @@ var application = &subcommands.DefaultApplication{
 	// Commands will be shown in this exact order, so you'll likely want to put
 	// them in alphabetical order or in logical grouping.
 	Commands: []*subcommands.Command{
+		subcommands.Section("Nonsleepy commands."),
 		cmdGreet,
 		subcommands.CmdHelp,
 		cmdAsk,
+		subcommands.Section("Sleepy commands."),
 		cmdSleep,
 	},
 	EnvVars: map[string]subcommands.EnvVarDefinition{
