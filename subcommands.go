@@ -37,7 +37,7 @@ type Application interface {
 	// be normally os.Stdout.
 	GetOut() io.Writer
 
-	// GetOut is used for testing to allow parallel test case execution, should
+	// GetErr is used for testing to allow parallel test case execution, should
 	// be normally os.Stderr.
 	GetErr() io.Writer
 
