@@ -10,17 +10,16 @@ import (
 	"github.com/maruel/subcommands"
 )
 
-// Common flags.
-type CommonFlags struct {
+type commonFlags struct {
 	subcommands.CommandRunBase
 	Verbose bool
 }
 
-func (c *CommonFlags) Init() {
+func (c *commonFlags) init() {
 	c.Flags.BoolVar(&c.Verbose, "verbose", false, "Enable verbose output.")
 }
 
-func (c *CommonFlags) Parse(d SampleApplication, special bool) error {
+func (c *commonFlags) parse(d sampleApplication, special bool) error {
 	if c.Verbose && !special {
 		// Enable logging when -verbose is specified.
 		a := d.(*sample)

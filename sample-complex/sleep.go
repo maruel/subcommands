@@ -29,7 +29,7 @@ type sleepRun struct {
 	duration int
 }
 
-func (c *sleepRun) main(a SampleApplication, dream bool) error {
+func (c *sleepRun) main(a sampleApplication, dream bool) error {
 	if c.duration <= 0 {
 		return errors.New("-duration is required")
 	}
@@ -53,7 +53,7 @@ func (c *sleepRun) Run(a subcommands.Application, args []string, env subcommands
 		fmt.Fprintf(a.GetErr(), "%s: Unsupported arguments.\n", a.GetName())
 		return 1
 	}
-	d := a.(SampleApplication)
+	d := a.(sampleApplication)
 	// This main() wrapping simplifies the surfacing of errors into printing to
 	// stderr then exiting with 1.
 	if err := c.main(d, env["VERBOSE_DREAMS"].Value == "1"); err != nil {

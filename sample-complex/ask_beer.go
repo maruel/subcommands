@@ -17,23 +17,23 @@ var cmdAskBeer = &subcommands.Command{
 	LongDesc:  "Asks for beer.",
 	CommandRun: func() subcommands.CommandRun {
 		c := &askBeerRun{}
-		c.Init()
+		c.init()
 		c.Flags.StringVar(&c.file, "file", "", "Sets a new version of start_slave.py")
 		return c
 	},
 }
 
 type askBeerRun struct {
-	CommonFlags
+	commonFlags
 	file string
 }
 
 func (c *askBeerRun) main(a askApplication) error {
-	if err := c.Parse(a, false); err != nil {
+	if err := c.parse(a, false); err != nil {
 		return err
 	}
 	// This makes the process returns 1.
-	return errors.New("It's a BYOB part!")
+	return errors.New("it's a BYOB part")
 }
 
 func (c *askBeerRun) Run(a subcommands.Application, args []string, env subcommands.Env) int {

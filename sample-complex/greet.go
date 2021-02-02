@@ -16,17 +16,17 @@ var cmdGreet = &subcommands.Command{
 	LongDesc:  "Greets someone. This command has no specific option except the common ones.",
 	CommandRun: func() subcommands.CommandRun {
 		c := &greetRun{}
-		c.Init()
+		c.init()
 		return c
 	},
 }
 
 type greetRun struct {
-	CommonFlags
+	commonFlags
 }
 
-func (c *greetRun) main(a SampleApplication, who, greeting string) error {
-	if err := c.Parse(a, false); err != nil {
+func (c *greetRun) main(a sampleApplication, who, greeting string) error {
+	if err := c.parse(a, false); err != nil {
 		return err
 	}
 	a.GetLog().Printf("Unnecessary logging, use -verbose to see it")
@@ -39,7 +39,7 @@ func (c *greetRun) Run(a subcommands.Application, args []string, env subcommands
 		fmt.Fprintf(a.GetErr(), "%s: Can only greet one person at a time.\n", a.GetName())
 		return 1
 	}
-	d := a.(SampleApplication)
+	d := a.(sampleApplication)
 	if err := c.main(d, args[0], env["GREET_STYLE"].Value); err != nil {
 		fmt.Fprintf(a.GetErr(), "%s: %s\n", a.GetName(), err)
 		return 1

@@ -8,7 +8,7 @@ The library is designed so that the test cases can run concurrently.
 Using global flags variables is discouraged to keep your program testable
 conccurently.
 
-The intented command is found via heuristic search;
+The intended command is found via heuristic search;
 
   - exact match
   - unique prefix, e.g. `lo` will run `longcommand` as long as there's no

@@ -98,7 +98,7 @@ func (a *DefaultApplication) GetEnvVars() map[string]EnvVarDefinition {
 // CommandRun.Run.
 type Env map[string]EnvVar
 
-// EnvVar will document the value and existance of a given environment variable,
+// EnvVar will document the value and existence of a given environment variable,
 // as defined by Application.GetEnvVars. Value will be the value from the
 // environment, or the Default value if it didn't exist. Exists will be true iff
 // the value was present in the environment.
@@ -383,7 +383,7 @@ func tmpl(w io.Writer, text string, data interface{}) {
 	t.Funcs(template.FuncMap{"trim": strings.TrimSpace, "wrapWithLines": wrapWithLines})
 	template.Must(t.Parse(text))
 	if err := t.Execute(w, data); err != nil {
-		panic(fmt.Sprintf("Failed to execute templare: %s", err))
+		panic(fmt.Sprintf("Failed to execute template: %s", err))
 	}
 }
 

@@ -7,7 +7,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 or implied. See the License for the specific language governing permissions and
 limitations under the License. */
 
-// Includes tools to help with concurrent testing.
+// Package subcommandstest includes tools to help with concurrent testing.
 package subcommandstest
 
 import (
@@ -102,6 +102,7 @@ func (t *TB) Verbose() {
 	t.log = log.New(os.Stderr, "", log.Lmicroseconds)
 }
 
+// GetLog implements Application.
 func (t *TB) GetLog() *log.Logger {
 	return t.log
 }
@@ -121,10 +122,12 @@ type ApplicationMock struct {
 	*TB
 }
 
+// GetOut implements subcommands.Application.
 func (a *ApplicationMock) GetOut() io.Writer {
 	return &a.bufOut
 }
 
+// GetErr implements subcommands.Application.
 func (a *ApplicationMock) GetErr() io.Writer {
 	return &a.bufErr
 }

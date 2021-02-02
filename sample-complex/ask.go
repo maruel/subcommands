@@ -5,8 +5,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/maruel/subcommands"
 )
 
@@ -16,31 +14,22 @@ var cmdAsk = &subcommands.Command{
 	LongDesc:  "Asks one of the known subquestion.",
 	CommandRun: func() subcommands.CommandRun {
 		c := &askRun{}
-		c.Init()
+		c.init()
 		return c
 	},
 }
 
 type askRun struct {
-	CommonFlags
-	who string
-}
-
-func (c *askRun) main(a SampleApplication, args []string) error {
-	if err := c.Parse(a, false); err != nil {
-		return err
-	}
-	fmt.Fprintf(a.GetOut(), "TODO: Implement me!\n")
-	return nil
+	commonFlags
 }
 
 // 'ask' is itself an application with subcommands.
 type askApplication struct {
-	SampleApplication
+	sampleApplication
 }
 
 func (q askApplication) GetName() string {
-	return q.SampleApplication.GetName() + " ask"
+	return q.sampleApplication.GetName() + " ask"
 }
 
 func (q askApplication) GetCommands() []*subcommands.Command {
@@ -53,7 +42,7 @@ func (q askApplication) GetCommands() []*subcommands.Command {
 }
 
 func (c *askRun) Run(a subcommands.Application, args []string, env subcommands.Env) int {
-	d := a.(SampleApplication)
+	d := a.(sampleApplication)
 	// Create an inner application.
 	return subcommands.Run(askApplication{d}, args)
 }

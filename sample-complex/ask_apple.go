@@ -16,20 +16,20 @@ var cmdAskApple = &subcommands.Command{
 	LongDesc:  "Asks for an apple.",
 	CommandRun: func() subcommands.CommandRun {
 		c := &askAppleRun{}
-		c.Init()
+		c.init()
 		c.Flags.BoolVar(&c.bare, "bare", false, "Shows only the bot id, no meta data")
 		return c
 	},
 }
 
 type askAppleRun struct {
-	CommonFlags
+	commonFlags
 	bare bool
 }
 
 func (c *askAppleRun) main(a askApplication) error {
 	// This command ignores -verbose.
-	if err := c.Parse(a, true); err != nil {
+	if err := c.parse(a, true); err != nil {
 		return err
 	}
 	fmt.Fprintf(a.GetOut(), "TODO: Implement 'ask apple'!\n")

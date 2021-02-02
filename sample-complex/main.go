@@ -39,7 +39,7 @@ var application = &subcommands.DefaultApplication{
 	},
 }
 
-type SampleApplication interface {
+type sampleApplication interface {
 	// TODO(maruel): This is wrong, subcommandtest should only be referenced in
 	// unit tests. Figure out a way to better plug logging.
 	subcommandstest.Application
