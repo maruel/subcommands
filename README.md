@@ -27,7 +27,7 @@ The intended command is found via heuristic search;
   - See [sample-complex](sample-complex) for a complex sample using advanced
     features.
   - See module
-    [subcommands/subcommandstest](https://pkg.go.dev/github.com/maruel/subcommands/subcommandtest)
+    [subcommands/subcommandstest](https://pkg.go.dev/github.com/maruel/subcommands/subcommandstest)
     for tools to help *testing* an application using subcommands. One of the
     main benefit is t.Parallel() just works, because subcommands help wrapping
     global variables.
