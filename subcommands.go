@@ -17,6 +17,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"sync"
 	"text/template"
 
 	"github.com/texttheater/golang-levenshtein/levenshtein"
@@ -327,22 +328,19 @@ func FindNearestCommand(a Application, name string) *Command {
 
 // Run runs the application, scheduling the subcommand. This is the main entry
 // point of the library.
+//
+// Unit tests should call this function directly with args provided so this is
+// concurrent safe.
+//
+// It is safer to use a base class embedding CommandRunBase that is then
+// embedded by each CommandRun implementation to define flags available for
+// all commands.
 func Run(a Application, args []string) int {
-	var helpUsed bool
-
 	// Process general flags first, mainly for -help.
-	flag.Usage = func() {
-		usage(a.GetErr(), a, false)
-		helpUsed = true
-	}
-
-	// Do not parse during unit tests because flag.commandLine.errorHandling == ExitOnError. :(
-	// It is safer to use a base class embedding CommandRunBase that is then
-	// embedded by each CommandRun implementation to define flags available for
-	// all commands.
+	helpUsed := false
 	if args == nil {
-		flag.Parse()
-		args = flag.Args()
+		// Do not parse during unit tests because flag.commandLine.errorHandling == ExitOnError. :(
+		args, helpUsed = parseGeneral(a)
 	}
 
 	if len(args) < 1 {
@@ -375,6 +373,28 @@ func Run(a Application, args []string) int {
 
 	fmt.Fprintf(a.GetErr(), "%s: unknown command %#q\n\nRun '%s help' for usage.\n", a.GetName(), args[0], a.GetName())
 	return 2
+}
+
+var mu sync.Mutex
+
+// parseGeneral parses the general flag in a way that is safe in unit tests
+// even when using t.Parallel()
+func parseGeneral(a Application) ([]string, bool) {
+	mu.Lock()
+	prev := flag.Usage
+	defer func() {
+		mu.Unlock()
+		flag.Usage = prev
+	}()
+	helpUsed := false
+	flag.Usage = func() {
+		usage(a.GetErr(), a, false)
+		helpUsed = true
+	}
+
+	// This may call flag.Usage():
+	flag.Parse()
+	return flag.Args(), helpUsed
 }
 
 // tmpl executes the given template text on data, writing the result to w.

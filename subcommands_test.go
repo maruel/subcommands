@@ -12,6 +12,9 @@ package subcommands
 
 import (
 	"bytes"
+	"io"
+	"os"
+	"strconv"
 	"testing"
 
 	"github.com/maruel/ut"
@@ -46,6 +49,7 @@ func TestFindNearestCommand(t *testing.T) {
 		{UsageLine: "Foo"},
 		{UsageLine: "LongCommand"},
 		{UsageLine: "LargCommand"},
+		Section("bar"),
 	}
 	a := &DefaultApplication{Commands: commands}
 
@@ -70,6 +74,9 @@ func TestFindNearestCommand(t *testing.T) {
 	ut.AssertEqual(t, commands[2], FindNearestCommand(a, "LongCmomand"))
 	ut.AssertEqual(t, commands[2], FindNearestCommand(a, "ongCommand"))
 	ut.AssertEqual(t, (*Command)(nil), FindNearestCommand(a, "LangCommand"))
+
+	// Section cannot be found.
+	ut.AssertEqual(t, (*Command)(nil), FindNearestCommand(a, "bar"))
 }
 
 func TestHelpOutput(t *testing.T) {
@@ -125,4 +132,162 @@ Use " help [command]" for more information about a command.
 
 `)
 
+}
+
+func TestDefaultApplication_GetOut_GetErr(t *testing.T) {
+	a := DefaultApplication{}
+	ut.AssertEqual(t, a.GetOut().(*os.File), os.Stdout)
+	ut.AssertEqual(t, a.GetErr().(*os.File), os.Stderr)
+}
+
+func TestCommandRunBase_GetFlags(t *testing.T) {
+	c := CommandRunBase{}
+	ut.AssertEqual(t, c.GetFlags(), &c.Flags)
+}
+
+func TestCmdHelp(t *testing.T) {
+	data := []struct {
+		args []string
+		out  string
+		err  string
+		exit int
+	}{
+		{
+			[]string{"help"},
+			"Title\n" +
+				"\n" +
+				"Usage:  App [command] [arguments]\n" +
+				"\n" +
+				"Commands:\n" +
+				"  help  prints help about a command\n" +
+				"\n" +
+				"\n" +
+				"Use \"App help [command]\" for more information about a command.\n" +
+				"Use \"App help -advanced\" to display all commands.\n" +
+				"\n",
+			"",
+			0,
+		},
+		{
+			[]string{"help", "-advanced"},
+			"Title\n" +
+				"\n" +
+				"Usage:  App [command] [arguments]\n" +
+				"\n" +
+				"Commands:\n" +
+				"  help  prints help about a command\n" +
+				"  foo   foo\n" +
+				"\n" +
+				"\n" +
+				"Use \"App help [command]\" for more information about a command.\n" +
+				"\n",
+			"",
+			0,
+		},
+		{
+			[]string{"help", "foo"},
+			"",
+			"Foo.\n" +
+				"\n" +
+				"usage:  App foo\n",
+			0,
+		},
+		{
+			[]string{"help", "foo", "bar"},
+			"",
+			"App: Too many arguments given\n" +
+				"\n" +
+				"Run 'App help' for usage.\n",
+			2,
+		},
+		{
+			[]string{"foo", "-help"},
+			"",
+			"Foo.\n" +
+				"\n" +
+				"usage:  App foo\n",
+			2,
+		},
+		{
+			[]string{"help", "inexistant"},
+			"",
+			"App: unknown command `inexistant`\n" +
+				"\n" +
+				"Run 'App help' for usage.\n",
+			2,
+		},
+		{
+			[]string{"inexistant"},
+			"",
+			"App: unknown command `inexistant`\n" +
+				"\n" +
+				"Run 'App help' for usage.\n",
+			2,
+		},
+		{
+			nil,
+			"",
+			"Title\n" +
+				"\n" +
+				"Usage:  App [command] [arguments]\n" +
+				"\n" +
+				"Commands:\n" +
+				"  help  prints help about a command\n" +
+				"\n" +
+				"\n" +
+				"Use \"App help [command]\" for more information about a command.\n" +
+				"Use \"App help -advanced\" to display all commands.\n" +
+				"\n",
+			2,
+		},
+	}
+
+	for i, line := range data {
+		line := line
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			a := application{
+				DefaultApplication: DefaultApplication{
+					Name:  "App",
+					Title: "Title",
+					Commands: []*Command{
+						CmdHelp,
+						{
+							UsageLine: "foo",
+							ShortDesc: "foo",
+							LongDesc:  "Foo.",
+							Advanced:  true,
+							CommandRun: func() CommandRun {
+								return &command{}
+							},
+						},
+					},
+				},
+			}
+			ut.AssertEqual(t, Run(&a, line.args), line.exit)
+			ut.AssertEqual(t, a.out.String(), line.out)
+			ut.AssertEqual(t, a.err.String(), line.err)
+		})
+	}
+}
+
+type application struct {
+	DefaultApplication
+	out bytes.Buffer
+	err bytes.Buffer
+}
+
+func (a *application) GetOut() io.Writer {
+	return &a.out
+}
+
+func (a *application) GetErr() io.Writer {
+	return &a.err
+}
+
+type command struct {
+	CommandRunBase
+}
+
+func (c *command) Run(a Application, args []string, env Env) int {
+	return 42
 }
