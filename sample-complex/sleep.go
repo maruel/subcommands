@@ -18,7 +18,7 @@ var cmdSleep = &subcommands.Command{
 	LongDesc:  "Sleeps for some time, as desired.",
 	CommandRun: func() subcommands.CommandRun {
 		c := &sleepRun{}
-		c.Flags.IntVar(&c.duration, "duration", 0, "Duration in seconds")
+		c.Flags.DurationVar(&c.duration, "duration", time.Second, "Duration")
 		return c
 	},
 }
@@ -26,15 +26,15 @@ var cmdSleep = &subcommands.Command{
 type sleepRun struct {
 	// This command doesn't implement the common flags.
 	subcommands.CommandRunBase
-	duration int
+	duration time.Duration
 }
 
-func (c *sleepRun) main(a sampleApplication, dream bool) error {
+func (c *sleepRun) main(a *sampleComplexApplication, dream bool) error {
 	if c.duration <= 0 {
 		return errors.New("-duration is required")
 	}
-	fmt.Fprintf(a.GetOut(), "Sleeping for %ds.\n", c.duration)
-	duration := time.Duration(c.duration) * time.Second
+	fmt.Fprintf(a.GetOut(), "Sleeping for %v.\n", c.duration)
+	duration := c.duration
 	if dream {
 		chunk := time.Millisecond * 100
 		for duration > 0 {
@@ -53,7 +53,7 @@ func (c *sleepRun) Run(a subcommands.Application, args []string, env subcommands
 		fmt.Fprintf(a.GetErr(), "%s: Unsupported arguments.\n", a.GetName())
 		return 1
 	}
-	d := a.(sampleApplication)
+	d := a.(*sampleComplexApplication)
 	// This main() wrapping simplifies the surfacing of errors into printing to
 	// stderr then exiting with 1.
 	if err := c.main(d, env["VERBOSE_DREAMS"].Value == "1"); err != nil {

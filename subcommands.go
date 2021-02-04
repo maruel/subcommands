@@ -162,10 +162,14 @@ func Section(name string) *Command {
 	}
 }
 
-// usage prints out the general application usage.
+// Usage prints out the general application Usage.
 //
-// TODO(maruel): Use termbox-go to enable coloring!
-func usage(out io.Writer, a Application, includeAdvanced bool) {
+// This is primarily useful when using embedded commands. See sample-complex
+// for an example.
+//
+// Beware that using the form "<tool> help -advanced <command>" will not
+// propagate CmdHelp's help into the subcommand help Usage.
+func Usage(out io.Writer, a Application, includeAdvanced bool) {
 	usageTemplate := `{{.Title}}
 
 Usage:  {{.Name}} [command] [arguments]
@@ -235,6 +239,7 @@ Use "{{.Name}} help -advanced" to display all commands.{{end}}
 	tmpl(out, fmt.Sprintf(usageTemplate, widestCmd, widestEnvVar), data)
 }
 
+// getCommandUsageHandler returns a flag.Usage compatible function.
 func getCommandUsageHandler(out io.Writer, a Application, c *Command, r CommandRun, helpUsed *bool) func() {
 	return func() {
 		helpTemplate := "{{.Cmd.LongDesc | trim | wrapWithLines}}usage:  {{.App.GetName}} {{.Cmd.UsageLine}}\n"
@@ -250,9 +255,12 @@ func getCommandUsageHandler(out io.Writer, a Application, c *Command, r CommandR
 
 // Initializes the flags for a specific CommandRun.
 func initCommand(a Application, c *Command, r CommandRun, out io.Writer, helpUsed *bool) {
-	r.GetFlags().Usage = getCommandUsageHandler(out, a, c, r, helpUsed)
-	r.GetFlags().SetOutput(out)
-	r.GetFlags().Init(c.Name(), flag.ContinueOnError)
+	f := r.GetFlags()
+	if f.Usage == nil {
+		f.Usage = getCommandUsageHandler(out, a, c, r, helpUsed)
+	}
+	f.SetOutput(out)
+	f.Init(c.Name(), flag.ContinueOnError)
 }
 
 // FindCommand finds a Command by name and returns it if found.
@@ -345,7 +353,7 @@ func Run(a Application, args []string) int {
 
 	if len(args) < 1 {
 		// Need a command.
-		usage(a.GetErr(), a, false)
+		Usage(a.GetErr(), a, false)
 		return 2
 	}
 
@@ -388,7 +396,7 @@ func parseGeneral(a Application) ([]string, bool) {
 	}()
 	helpUsed := false
 	flag.Usage = func() {
-		usage(a.GetErr(), a, false)
+		Usage(a.GetErr(), a, false)
 		helpUsed = true
 	}
 
@@ -436,7 +444,7 @@ type helpRun struct {
 
 func (c *helpRun) Run(a Application, args []string, env Env) int {
 	if len(args) == 0 {
-		usage(a.GetOut(), a, c.advanced)
+		Usage(a.GetOut(), a, c.advanced)
 		return 0
 	}
 	if len(args) != 1 {

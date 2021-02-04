@@ -79,7 +79,7 @@ func TestFindNearestCommand(t *testing.T) {
 	ut.AssertEqual(t, (*Command)(nil), FindNearestCommand(a, "bar"))
 }
 
-func TestHelpOutput(t *testing.T) {
+func TestUsage(t *testing.T) {
 	a := &DefaultApplication{
 		Commands: []*Command{
 			{UsageLine: "Foo", ShortDesc: "A foo"},
@@ -93,7 +93,7 @@ func TestHelpOutput(t *testing.T) {
 	}
 
 	buf := bytes.Buffer{}
-	usage(&buf, a, false)
+	Usage(&buf, a, false)
 
 	ut.AssertEqual(t, buf.String(), `
 
@@ -113,7 +113,7 @@ Use " help -advanced" to display all commands.
 `)
 
 	buf.Reset()
-	usage(&buf, a, true)
+	Usage(&buf, a, true)
 	ut.AssertEqual(t, buf.String(), `
 
 Usage:   [command] [arguments]
@@ -131,7 +131,6 @@ Environment Variables:
 Use " help [command]" for more information about a command.
 
 `)
-
 }
 
 func TestDefaultApplication_GetOut_GetErr(t *testing.T) {

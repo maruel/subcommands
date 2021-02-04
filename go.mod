@@ -3,6 +3,7 @@ module github.com/maruel/subcommands
 go 1.13
 
 require (
+	github.com/google/go-cmp v0.5.4
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/maruel/ut v1.0.2

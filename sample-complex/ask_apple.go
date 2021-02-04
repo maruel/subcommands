@@ -17,22 +17,25 @@ var cmdAskApple = &subcommands.Command{
 	CommandRun: func() subcommands.CommandRun {
 		c := &askAppleRun{}
 		c.init()
-		c.Flags.BoolVar(&c.bare, "bare", false, "Shows only the bot id, no meta data")
+		c.Flags.BoolVar(&c.direct, "direct", false, "Be more direct")
 		return c
 	},
 }
 
 type askAppleRun struct {
-	commonFlags
-	bare bool
+	askCommonFlags
+	direct bool
 }
 
-func (c *askAppleRun) main(a askApplication) error {
-	// This command ignores -verbose.
-	if err := c.parse(a, true); err != nil {
+func (c *askAppleRun) main(a *sampleComplexApplication) error {
+	if err := c.parse(a); err != nil {
 		return err
 	}
-	fmt.Fprintf(a.GetOut(), "TODO: Implement 'ask apple'!\n")
+	if c.direct {
+		fmt.Fprintf(a.GetOut(), "No way!\n")
+		return nil
+	}
+	fmt.Fprintf(a.GetOut(), "Maybe one day.\n")
 	return nil
 }
 
@@ -41,7 +44,7 @@ func (c *askAppleRun) Run(a subcommands.Application, args []string, env subcomma
 		fmt.Fprintf(a.GetErr(), "%s: Unknown arguments.\n", a.GetName())
 		return 1
 	}
-	d := a.(askApplication)
+	d := a.(*sampleComplexApplication)
 	if err := c.main(d); err != nil {
 		fmt.Fprintf(a.GetErr(), "%s: %s\n", a.GetName(), err)
 		return 1

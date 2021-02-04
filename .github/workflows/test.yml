@@ -221,10 +221,10 @@ jobs:
         go-version: "${{matrix.gover}}"
     - uses: actions/checkout@v2
       with:
-        path: src/github.com/maruel/panicparse
+        path: src/github.com/maruel/subcommands
     - name: 'Check: go get -d -t'
-      working-directory: src/github.com/maruel/panicparse
+      working-directory: src/github.com/maruel/subcommands
       run: go get -d -t ./...
     - name: 'Check: go test'
-      working-directory: src/github.com/maruel/panicparse
+      working-directory: src/github.com/maruel/subcommands
       run: go test -timeout=40s ./...

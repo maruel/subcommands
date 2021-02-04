@@ -2,27 +2,28 @@
 // Use of this source code is governed under the Apache License, Version 2.0
 // that can be found in the LICENSE file.
 
-// sample - Sample app to demonstrate example usage of package subcommand.
+// sample-complex - Sample app to demonstrate example usage of package
+// subcommand.
 package main
 
 import (
+	"flag"
 	"io/ioutil"
 	"log"
 	"os"
 
 	"github.com/maruel/subcommands"
-	"github.com/maruel/subcommands/subcommandstest"
 )
 
 var application = &subcommands.DefaultApplication{
-	Name:  "sample",
+	Name:  "sample-complex",
 	Title: "Sample tool to act as a skeleton for subcommands usage.",
 	// Commands will be shown in this exact order, so you'll likely want to put
 	// them in alphabetical order or in logical grouping.
 	Commands: []*subcommands.Command{
 		subcommands.Section("Nonsleepy commands."),
 		cmdGreet,
-		subcommands.CmdHelp,
+		cmdHelp,
 		cmdAsk,
 		subcommands.Section("Sleepy commands."),
 		cmdSleep,
@@ -39,27 +40,34 @@ var application = &subcommands.DefaultApplication{
 	},
 }
 
-type sampleApplication interface {
-	// TODO(maruel): This is wrong, subcommandtest should only be referenced in
-	// unit tests. Figure out a way to better plug logging.
-	subcommandstest.Application
-
-	// Add anything desired, in particular if you'd like to crete a fake
-	// application during testing.
+// cmdHelp overrides subcommands.CmdHelp to enable capture of the -advanced
+// flag, which will be necessary when using subcommands.
+var cmdHelp = &subcommands.Command{
+	UsageLine: subcommands.CmdHelp.UsageLine,
+	ShortDesc: subcommands.CmdHelp.ShortDesc,
+	LongDesc:  subcommands.CmdHelp.LongDesc,
+	CommandRun: func() subcommands.CommandRun {
+		// Use the original implementation then steal -advanced.
+		ret := subcommands.CmdHelp.CommandRun()
+		ret.GetFlags().VisitAll(func(f *flag.Flag) {
+			if f.Name == "advanced" {
+				helpAdvanced = f.Value
+			}
+		})
+		return ret
+	},
 }
 
-type sample struct {
+// Warning: this is not concurrent safe. Only a concern when unit testing.
+var helpAdvanced flag.Value
+
+type sampleComplexApplication struct {
 	*subcommands.DefaultApplication
 	log *log.Logger
 }
 
-// GetLog implements subcommandstest.Application.
-func (s *sample) GetLog() *log.Logger {
-	return s.log
-}
-
 func main() {
 	subcommands.KillStdLog()
-	s := &sample{application, log.New(ioutil.Discard, "", log.LstdFlags|log.Lmicroseconds)}
+	s := &sampleComplexApplication{application, log.New(ioutil.Discard, "", log.LstdFlags|log.Lmicroseconds)}
 	os.Exit(subcommands.Run(s, nil))
 }

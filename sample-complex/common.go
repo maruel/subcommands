@@ -19,11 +19,10 @@ func (c *commonFlags) init() {
 	c.Flags.BoolVar(&c.Verbose, "verbose", false, "Enable verbose output.")
 }
 
-func (c *commonFlags) parse(d sampleApplication, special bool) error {
-	if c.Verbose && !special {
+func (c *commonFlags) parse(a *sampleComplexApplication) error {
+	if c.Verbose {
 		// Enable logging when -verbose is specified.
-		a := d.(*sample)
-		a.log = log.New(d.GetErr(), a.log.Prefix(), a.log.Flags())
+		a.log = log.New(a.GetErr(), a.log.Prefix(), a.log.Flags())
 	}
 	return nil
 }

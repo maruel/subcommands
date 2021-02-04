@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/maruel/subcommands"
 )
@@ -25,11 +26,11 @@ type greetRun struct {
 	commonFlags
 }
 
-func (c *greetRun) main(a sampleApplication, who, greeting string) error {
-	if err := c.parse(a, false); err != nil {
+func (c *greetRun) main(a *sampleComplexApplication, who, greeting string) error {
+	if err := c.parse(a); err != nil {
 		return err
 	}
-	a.GetLog().Printf("Unnecessary logging, use -verbose to see it")
+	log.Printf("Unnecessary logging, use -verbose to see it")
 	fmt.Fprintf(a.GetOut(), "%s %s!\n", greeting, who)
 	return nil
 }
@@ -39,7 +40,7 @@ func (c *greetRun) Run(a subcommands.Application, args []string, env subcommands
 		fmt.Fprintf(a.GetErr(), "%s: Can only greet one person at a time.\n", a.GetName())
 		return 1
 	}
-	d := a.(sampleApplication)
+	d := a.(*sampleComplexApplication)
 	if err := c.main(d, args[0], env["GREET_STYLE"].Value); err != nil {
 		fmt.Fprintf(a.GetErr(), "%s: %s\n", a.GetName(), err)
 		return 1

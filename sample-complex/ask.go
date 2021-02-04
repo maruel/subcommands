@@ -5,8 +5,22 @@
 package main
 
 import (
+	"os"
+
 	"github.com/maruel/subcommands"
 )
+
+var askApplication = &subcommands.DefaultApplication{
+	Name:  "sample-complex ask",
+	Title: "Ask stuff.",
+	// Commands will be shown in this exact order, so you'll likely want to put
+	// them in alphabetical order or in logical grouping.
+	Commands: []*subcommands.Command{
+		cmdAskApple,
+		cmdAskBeer,
+		cmdHelp,
+	},
+}
 
 var cmdAsk = &subcommands.Command{
 	UsageLine: "ask <subcommand>",
@@ -15,6 +29,11 @@ var cmdAsk = &subcommands.Command{
 	CommandRun: func() subcommands.CommandRun {
 		c := &askRun{}
 		c.init()
+		app := sampleComplexApplication{askApplication, nil}
+		c.Flags.Usage = func() {
+			advanced := helpAdvanced != nil && helpAdvanced.String() == "true"
+			subcommands.Usage(os.Stderr, &app, advanced)
+		}
 		return c
 	},
 }
@@ -23,26 +42,20 @@ type askRun struct {
 	commonFlags
 }
 
-// 'ask' is itself an application with subcommands.
-type askApplication struct {
-	sampleApplication
+type askCommonFlags struct {
+	subcommands.CommandRunBase
 }
 
-func (q askApplication) GetName() string {
-	return q.sampleApplication.GetName() + " ask"
+func (a *askCommonFlags) init() {
 }
 
-func (q askApplication) GetCommands() []*subcommands.Command {
-	// Keep in alphabetical order of their name.
-	return []*subcommands.Command{
-		cmdAskApple,
-		cmdAskBeer,
-		subcommands.CmdHelp,
-	}
+func (a *askCommonFlags) parse(*sampleComplexApplication) error {
+	return nil
 }
 
 func (c *askRun) Run(a subcommands.Application, args []string, env subcommands.Env) int {
-	d := a.(sampleApplication)
+	d := a.(*sampleComplexApplication)
 	// Create an inner application.
-	return subcommands.Run(askApplication{d}, args)
+	app := sampleComplexApplication{askApplication, d.log}
+	return subcommands.Run(&app, args)
 }
