@@ -5,6 +5,7 @@
 // "go run ." on before 1.11 has a quirk where it runs but prints
 // go run: no go files listed
 
+//go:build go1.11
 // +build go1.11
 
 package main_test
