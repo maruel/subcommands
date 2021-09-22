@@ -110,8 +110,9 @@ func TestHelp(t *testing.T) {
 				"Usage:  sample-complex ask [command] [arguments]\n" +
 				"\n" +
 				"Commands:\n" +
-				"  apple  asks for an apple\n" +
-				"  help   prints help about a command\n" +
+				"  apple      asks for an apple\n" +
+				"  arbitrary  asks for anything you want\n" +
+				"  help       prints help about a command\n" +
 				"\n" +
 				"\n" +
 				"Use \"sample-complex ask help [command]\" for more information about a command.\n" +
@@ -127,8 +128,9 @@ func TestHelp(t *testing.T) {
 				"Usage:  sample-complex ask [command] [arguments]\n" +
 				"\n" +
 				"Commands:\n" +
-				"  apple  asks for an apple\n" +
-				"  help   prints help about a command\n" +
+				"  apple      asks for an apple\n" +
+				"  arbitrary  asks for anything you want\n" +
+				"  help       prints help about a command\n" +
 				"\n" +
 				"\n" +
 				"Use \"sample-complex ask help [command]\" for more information about a command.\n" +
@@ -144,8 +146,9 @@ func TestHelp(t *testing.T) {
 				"Usage:  sample-complex ask [command] [arguments]\n" +
 				"\n" +
 				"Commands:\n" +
-				"  apple  asks for an apple\n" +
-				"  help   prints help about a command\n" +
+				"  apple      asks for an apple\n" +
+				"  arbitrary  asks for anything you want\n" +
+				"  help       prints help about a command\n" +
 				"\n" +
 				"\n" +
 				"Use \"sample-complex ask help [command]\" for more information about a command.\n" +
@@ -160,9 +163,10 @@ func TestHelp(t *testing.T) {
 				"Usage:  sample-complex ask [command] [arguments]\n" +
 				"\n" +
 				"Commands:\n" +
-				"  apple  asks for an apple\n" +
-				"  beer   asks for beer\n" +
-				"  help   prints help about a command\n" +
+				"  apple      asks for an apple\n" +
+				"  beer       asks for beer\n" +
+				"  arbitrary  asks for anything you want\n" +
+				"  help       prints help about a command\n" +
 				"\n" +
 				"\n" +
 				"Use \"sample-complex ask help [command]\" for more information about a command.\n" +
@@ -176,8 +180,9 @@ func TestHelp(t *testing.T) {
 				"Usage:  sample-complex ask [command] [arguments]\n" +
 				"\n" +
 				"Commands:\n" +
-				"  apple  asks for an apple\n" +
-				"  help   prints help about a command\n" +
+				"  apple      asks for an apple\n" +
+				"  arbitrary  asks for anything you want\n" +
+				"  help       prints help about a command\n" +
 				"\n" +
 				"\n" +
 				"Use \"sample-complex ask help [command]\" for more information about a command.\n" +
@@ -192,13 +197,19 @@ func TestHelp(t *testing.T) {
 				"Usage:  sample-complex ask [command] [arguments]\n" +
 				"\n" +
 				"Commands:\n" +
-				"  apple  asks for an apple\n" +
-				"  beer   asks for beer\n" +
-				"  help   prints help about a command\n" +
+				"  apple      asks for an apple\n" +
+				"  beer       asks for beer\n" +
+				"  arbitrary  asks for anything you want\n" +
+				"  help       prints help about a command\n" +
 				"\n" +
 				"\n" +
 				"Use \"sample-complex ask help [command]\" for more information about a command.\n" +
 				"\n",
+			0,
+		},
+		{
+			[]string{"ask", "arbitrary", "-flags", "-don't", "matter?"},
+			"You asked: -flags -don't matter?\nThat's a great question!\n",
 			0,
 		},
 	}

@@ -116,6 +116,11 @@ type CommandRun interface {
 	Run(a Application, args []string, env Env) int
 
 	// GetFlags returns the flags for this specific command.
+	//
+	// If this returns `nil`, then any additional arguments for this command will
+	// be passed unaltered as `args` to `Run()`. This is useful to delay command
+	// line parsing for implementing, for example, wrapper commands around other
+	// scripts.
 	GetFlags() *flag.FlagSet
 }
 
@@ -248,19 +253,24 @@ func getCommandUsageHandler(out io.Writer, a Application, c *Command, r CommandR
 			Cmd *Command
 		}{a, c}
 		tmpl(out, helpTemplate, dict)
-		r.GetFlags().PrintDefaults()
+		if f := r.GetFlags(); f != nil {
+			f.PrintDefaults()
+		}
 		*helpUsed = true
 	}
 }
 
 // Initializes the flags for a specific CommandRun.
-func initCommand(a Application, c *Command, r CommandRun, out io.Writer, helpUsed *bool) {
+func initCommand(a Application, c *Command, r CommandRun, out io.Writer, helpUsed *bool) (hasFlags bool) {
 	f := r.GetFlags()
-	if f.Usage == nil {
-		f.Usage = getCommandUsageHandler(out, a, c, r, helpUsed)
+	if f != nil {
+		if f.Usage == nil {
+			f.Usage = getCommandUsageHandler(out, a, c, r, helpUsed)
+		}
+		f.SetOutput(out)
+		f.Init(c.Name(), flag.ContinueOnError)
 	}
-	f.SetOutput(out)
-	f.Init(c.Name(), flag.ContinueOnError)
+	return f != nil
 }
 
 // FindCommand finds a Command by name and returns it if found.
@@ -360,12 +370,18 @@ func Run(a Application, args []string) int {
 	if c := FindNearestCommand(a, args[0]); c != nil {
 		// Initialize the flags.
 		r := c.CommandRun()
-		initCommand(a, c, r, a.GetErr(), &helpUsed)
-		if err := r.GetFlags().Parse(args[1:]); err != nil {
-			return 2
-		}
-		if helpUsed {
-			return 0
+		hasFlags := initCommand(a, c, r, a.GetErr(), &helpUsed)
+		var cmdArgs []string
+		if hasFlags {
+			if err := r.GetFlags().Parse(args[1:]); err != nil {
+				return 2
+			}
+			if helpUsed {
+				return 0
+			}
+			cmdArgs = r.GetFlags().Args()
+		} else {
+			cmdArgs = args[1:]
 		}
 		envVars := a.GetEnvVars()
 		envMap := make(map[string]EnvVar, len(envVars))
@@ -376,7 +392,7 @@ func Run(a Application, args []string) int {
 			}
 			envMap[k] = EnvVar{val, ok}
 		}
-		return r.Run(a, r.GetFlags().Args(), envMap)
+		return r.Run(a, cmdArgs, envMap)
 	}
 
 	fmt.Fprintf(a.GetErr(), "%s: unknown command %#q\n\nRun '%s help' for usage.\n", a.GetName(), args[0], a.GetName())
@@ -456,8 +472,11 @@ func (c *helpRun) Run(a Application, args []string, env Env) int {
 	if cmd := FindNearestCommand(a, args[0]); cmd != nil {
 		// Initialize the flags.
 		r := cmd.CommandRun()
-		initCommand(a, cmd, r, a.GetErr(), &helpUsed)
-		r.GetFlags().Usage()
+		if initCommand(a, cmd, r, a.GetErr(), &helpUsed) {
+			r.GetFlags().Usage()
+		} else {
+			getCommandUsageHandler(a.GetErr(), a, cmd, r, &helpUsed)()
+		}
 		return 0
 	}
 

@@ -18,6 +18,7 @@ var askApplication = &subcommands.DefaultApplication{
 	Commands: []*subcommands.Command{
 		cmdAskApple,
 		cmdAskBeer,
+		cmdAskArbitrary,
 		cmdHelp,
 	},
 }
