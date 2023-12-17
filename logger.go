@@ -5,7 +5,7 @@
 package subcommands
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 )
 
@@ -27,5 +27,5 @@ func KillStdLog() {
 // VoidStdLog sets an output that will be ignored. This permits ignoring any
 // log.*() calls that would inhibit efficient use of t.Parallel().
 func VoidStdLog() {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 }

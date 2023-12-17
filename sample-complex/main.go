@@ -8,7 +8,7 @@ package main
 
 import (
 	"flag"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 
@@ -68,6 +68,6 @@ type sampleComplexApplication struct {
 
 func main() {
 	subcommands.KillStdLog()
-	s := &sampleComplexApplication{application, log.New(ioutil.Discard, "", log.LstdFlags|log.Lmicroseconds)}
+	s := &sampleComplexApplication{application, log.New(io.Discard, "", log.LstdFlags|log.Lmicroseconds)}
 	os.Exit(subcommands.Run(s, nil))
 }

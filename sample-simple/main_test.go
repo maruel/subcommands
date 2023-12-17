@@ -5,7 +5,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"testing"
@@ -20,7 +20,7 @@ import (
 // TODO(maruel): Create an in-memory os.File, couldn't quickly find a ready
 // made fake only.
 func newTempFile(t testing.TB) *os.File {
-	f, err := ioutil.TempFile("", "sample-simple")
+	f, err := os.CreateTemp("", "sample-simple")
 	ut.AssertEqual(t, nil, err)
 	return f
 }
@@ -38,7 +38,7 @@ func mockStdout(t testing.TB) func() {
 
 func assertStdout(t testing.TB, expected string) {
 	_, _ = os.Stdout.Seek(0, 0)
-	actual, err := ioutil.ReadAll(os.Stdout)
+	actual, err := io.ReadAll(os.Stdout)
 	ut.AssertEqual(t, nil, err)
 	ut.AssertEqual(t, expected, string(actual))
 }
